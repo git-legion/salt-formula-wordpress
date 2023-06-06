@@ -1,21 +1,17 @@
-# update target server
 apt_update:
   cmd.run:
     - name: sudo apt update
 
-# Install nginx
 nginx_server:
   pkg.installed:
     - names:
       - nginx
 
-# Start and enable nginx
 start_nginx:
   service.running:
     - name: nginx
     - enable: True
 
-# Install PHP packages
 install_php_packages:
   pkg.installed:
     - names:
@@ -31,26 +27,21 @@ install_php_packages:
       - php-xmlrpc
       - php-zip
 
-# Install mysql-server
 mysql_server:
   pkg.installed:
     - names:
       - mysql-server
 
-# Start and enable mysql-server
 start_mysql:
   service.running:
     - name: mysql
     - enable: True
 
-# Start and enable php7.4-fpm
 start_php_fpm:
   service.running:
     - name: php7.4-fpm
     - enable: True
 
-
-# Configure wordpress mysql database
 
 mysql-python:
   pkg.installed:
@@ -90,7 +81,6 @@ mysql-flush:
     - require:
       - mysql-privileges
 
-# Download and extract WordPress
 download_wordpress:
   cmd.run:
     - name: sudo wget -c http://wordpress.org/latest.tar.gz
@@ -101,7 +91,6 @@ extract_wordpress:
     - name: sudo tar -xzvf /tmp/latest.tar.gz
     - cwd: /var/www/html
 
-# Configure WordPress ownership and permissions
 wordpress_ownership:
   file.directory:
     - name: /var/www/html/wordpress
@@ -123,7 +112,6 @@ wordpress_permissions:
       - mode
 
 
-# Create NGINX Virtual Host for WordPress
 create_wordpress_conf:
   cmd.run:
     - name: touch /etc/nginx/conf.d/wordpress.conf
@@ -156,13 +144,10 @@ write_to_file_wordpress_conf:
     - group: root
     - mode: 0644
 
-# Remove default config
 remove_nginx_default:
   file.absent:
     - name: /etc/nginx/sites-enabled/default
 
-
-# check nginx config file 
 
 check_nginx_configuration:
   cmd.run:
@@ -171,23 +156,16 @@ check_nginx_configuration:
       - service: nginx
 
 
-# create wp_config.php
-
 copy_wp_config:
   cmd.run:
     - name: sudo cp /var/www/html/wordpress/wp-config-sample.php /var/www/html/wordpress/wp-config.php
 
 
-# Update wp-config.php file
 update_wp_config:
   cmd.run:
     - name: sed -i "s/define( 'DB_NAME', 'database_name_here' );/define( 'DB_NAME', 'wordpress' );/g; s/define( 'DB_USER', 'username_here' );/define( 'DB_USER', 'sanjay' );/g; s/define( 'DB_PASSWORD', 'password_here' );/define( 'DB_PASSWORD', 'metrix@123' );/g; s/define( 'DB_HOST', 'localhost' );/define( 'DB_HOST', 'localhost' );/g" wp-config.php
     - cwd: /var/www/html/wordpress
 
-
-
-
-# Restart nginx service
 restart_nginx:
   cmd.run:
     - name: systemctl restart nginx
